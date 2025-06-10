@@ -1,0 +1,4 @@
+repository "Sketch-Rouge/Sketch-Rouge@5772913442992@cloud"
+  path "/"
+    br "/main"
+    co "/main"
