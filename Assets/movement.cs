@@ -1,14 +1,14 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
 public class movement : MonoBehaviour
 {
-
-    // Update is called once per frame
-    private Vector2 moveInput;
-    private Rigidbody2D rb;
+    public Rigidbody2D rb;
+    public float fart = 5f;
+    public InputActionReference move;
+    private Vector2 retning;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -16,11 +16,10 @@ public class movement : MonoBehaviour
     
     void Update()
     {
-        moveInput = context.ReadValue<Vector2>();
+        retning = move.action.ReadValue<Vector2>();
     }
     void FixedUpdate()
     {
-        Vector2 retning = new Vector2(horizontal, vertical);
-        rb.AddForce(retning, ForceMode2D.Force);
+        rb.linearVelocity = new Vector2(retning.x * fart, retning.y * fart);
     }
 }
