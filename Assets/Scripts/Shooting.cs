@@ -24,25 +24,37 @@ public class Shooting : MonoBehaviour
     }
     void OnEnable()
     {
-        skyt.action.started += Fire;
+        if (skyt)
+        {
+            skyt.action.Enable();
+            skyt.action.started += Fire;    
+        }
     }
     void OnDisable()
     {
-        skyt.action.started -= Fire;
+        if (skyt)
+        {
+            skyt.action.started -= Fire;
+        }
     }
     private void Fire(InputAction.CallbackContext obj)
     {   
         if (!canShoot) return; //Hindrer å skyte for tidlig
 
         Vector2 direction = Vector2.zero;
+        Vector3 position = transform.position;
 
         if (Keyboard.current.rightArrowKey.isPressed) {direction = Vector2.right;}
-        if (Keyboard.current.leftArrowKey.isPressed) {direction = Vector2.left;}
         if (Keyboard.current.upArrowKey.isPressed) {direction = Vector2.up;}
         if (Keyboard.current.downArrowKey.isPressed) {direction = Vector2.down;}
+        if (Keyboard.current.leftArrowKey.isPressed)
+        {
+            direction = Vector2.left;
+            position.y += 0.0001f;          // Vet ikke om dette skjedde med deg, men for meg så skjøt den ish
+        }                                   // skrått nedover når jeg trykka left arrow, men dette fiksa det :))
 
-        
-        GameObject newBullet = Instantiate(bullet, transform.position, Quaternion.identity);   //Instansierer kula
+
+        GameObject newBullet = Instantiate(bullet, position, Quaternion.identity);   //Instansierer kula
         BulletMovement bulletMovement = newBullet.GetComponent<BulletMovement>();              //Setter Scriptet "BulletMovement" til newBullet
         bulletMovement.direction = direction;                                                  //bestemmer hvilken retning den skal få
       
