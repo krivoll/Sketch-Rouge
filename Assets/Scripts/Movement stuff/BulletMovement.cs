@@ -10,8 +10,8 @@ public class BulletMovement : MonoBehaviour
     private Rigidbody2D rb;
 
     public Vector2 direction;
-    
-    
+
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -30,5 +30,12 @@ public class BulletMovement : MonoBehaviour
         // else { posx = 0; posy = position.y; }
 
         rb.linearVelocity = new Vector2(direction.x * bulletSpeed, direction.y * bulletSpeed);
+    }
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (!collision.gameObject.name.Equals("Player"))
+        {
+            Destroy(gameObject);
+        }
     }
 }
