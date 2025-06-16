@@ -1,10 +1,12 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Shooting : MonoBehaviour
 {
-    public float bulletSpeed;
+    public float atkSpeed;
 
     public GameObject bullet; 
+   
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -15,7 +17,7 @@ public class Shooting : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Space")) {
+        if (Input.GetButtonDown("Left Arrow")) {
             Instantiate(bullet);
         }
         
