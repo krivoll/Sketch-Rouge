@@ -84,7 +84,7 @@
                     "name": "",
                     "id": "9cf97043-c3ac-48a7-9587-981d9422aaad",
                     "path": "<Keyboard>/rightArrow",
-                    "interactions": "",
+                    "interactions": "Hold",
                     "processors": "",
                     "groups": "",
                     "action": "Shooting",
