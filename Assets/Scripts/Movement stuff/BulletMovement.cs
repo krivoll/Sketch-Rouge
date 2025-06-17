@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 public class BulletMovement : MonoBehaviour
 
 {
-    public Vector2 position;
+  
     public float bulletSpeed = 10f;
     private Rigidbody2D rb;
 
@@ -15,7 +15,6 @@ public class BulletMovement : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        position = transform.position;
         rb = GetComponent<Rigidbody2D>();
     }
 
