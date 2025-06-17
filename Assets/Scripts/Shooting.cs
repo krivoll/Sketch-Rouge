@@ -15,7 +15,7 @@ public class Shooting : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-   
+       
     }
     // Update is called once per frame
     void FixedUpdate()
@@ -52,6 +52,7 @@ public class Shooting : MonoBehaviour
             direction = Vector2.left;
             position.y += 0.0001f;          // Vet ikke om dette skjedde med deg, men for meg så skjøt den ish
         }                                   // skrått nedover når jeg trykka left arrow, men dette fiksa det :))
+
 
 
         GameObject newBullet = Instantiate(bullet, position, Quaternion.identity);   //Instansierer kula
