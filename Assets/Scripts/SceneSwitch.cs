@@ -1,43 +1,101 @@
-
 using System.Collections;
-
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class SceneSwitch : MonoBehaviour
 {
-    public string scene; 
-
-    public GameObject player;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     void OnTriggerExit2D(Collider2D other)
     {
-        Debug.Log("Hallo");
-        if (player == other.gameObject) {
-        StartCoroutine(LoadYourAsyncScene());
+        if (Player.Instance.gameObject != other.gameObject) return;
+
+
+        if (!SceneTracker.returnToPreviousDoor) {
+      
+            SceneTracker.previousScene = SceneManager.GetActiveScene().name; //for å kunne gå tilbake
+            SceneTracker.previousPositon = Player.Instance.gameObject.transform.position;
+            
+            //  foreach (GameObject gameObject in SceneManager.GetSceneByName(SceneTracker.previousScene).GetRootGameObjects()) {
+            //     if (!gameObject.CompareTag("Door")) {
+                  
+            //     gameObject.SetActive(false); }
+            // }
+            StartCoroutine(RandomScene());
+           
+        }
+        else {
+       
+            // foreach (GameObject gameObject in SceneManager.GetSceneByName(SceneTracker.previousScene).GetRootGameObjects()) {
+            //     gameObject.SetActive(true);
+            // }
+            StartCoroutine(LoadPreviousScene());
+            
+            
         }
     }
-    IEnumerator LoadYourAsyncScene() {
+
+    IEnumerator RandomScene() {
         Scene currentScene = SceneManager.GetActiveScene();
         
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
+        int sceneCount = SceneManager.sceneCountInBuildSettings;
+        int sceneIndex;
 
-        while (!asyncLoad.isDone) {
-            yield return null;
+
+        do {
+            sceneIndex = Random.Range(0, sceneCount);
+        } while (SceneManager.GetSceneByBuildIndex(sceneIndex) == currentScene);
+
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneIndex, LoadSceneMode.Additive);
+    
+         while (!asyncLoad.isDone)
+    {
+        yield return null; // Venter en fram hvis asyncLoad ikke er ferdig
+    }
+        yield return null;
+     
+        Scene newScene = SceneManager.GetSceneByBuildIndex(sceneIndex);
+        SceneManager.MoveGameObjectToScene(Player.Instance.gameObject, newScene);
+
+        Debug.Log("Hakllo");
+
+        string oppositeDoor = SceneTracker.getOppositeDoor(gameObject.name);
+        GameObject[] doors = GameObject.FindGameObjectsWithTag("Door");
+
+        foreach (GameObject door in doors) {
+            if (door.name.Contains(oppositeDoor)) {
+                Player.Instance.gameObject.transform.position = door.transform.position;
+                break;
+            }
+            
         }
-        SceneManager.MoveGameObjectToScene(player, SceneManager.GetSceneByName(scene));
-      
-        SceneManager.UnloadSceneAsync(currentScene); //Litt usikker hva dette gjør, men fant det på unity nettside
+        
+    
+        SceneManager.UnloadSceneAsync(currentScene);
+
+        Debug.Log("Hei");
+    }
+
+    IEnumerator LoadPreviousScene() {
+        yield return SceneManager.LoadSceneAsync(SceneTracker.previousScene, LoadSceneMode.Additive);
+        
+        Player.Instance.gameObject.transform.position = SceneTracker.previousPositon;
+        SceneManager.MoveGameObjectToScene(Player.Instance.gameObject, SceneManager.GetSceneByName(SceneTracker.previousScene));
+
+        string oppositeDoor = SceneTracker.getOppositeDoor(gameObject.name);
+        GameObject[] doors = GameObject.FindGameObjectsWithTag("Door");
+
+           foreach (GameObject door in doors) {
+            
+            if (door.name.Contains(oppositeDoor)) {
+                Player.Instance.gameObject.transform.position = door.transform.position;
+                break;
+            }
+            
+        }
+        SceneManager.MoveGameObjectToScene(Player.Instance.gameObject, SceneManager.GetSceneByName(SceneTracker.previousScene));
+        
+        SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
+
+ 
     }
 }

@@ -7,7 +7,7 @@ public class EnemyMovement : MonoBehaviour
 
     public Rigidbody2D rb; 
 
-       public GameObject TrackedPlayer; 
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -17,7 +17,7 @@ public class EnemyMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Transform TransformedPlayer = TrackedPlayer.GetComponent<Transform>();
+        Transform TransformedPlayer = Player.Instance.GetComponent<Transform>();
         Vector2 direction = TransformedPlayer.position;
         transform.position = Vector2.MoveTowards(transform.position, direction, EnemySpeed * Time.deltaTime);
     }
