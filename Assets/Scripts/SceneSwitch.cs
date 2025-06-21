@@ -8,18 +8,23 @@ public class SceneSwitch : MonoBehaviour
         
     }
     void OnTriggerExit2D(Collider2D other)
-    {
-        Door thisDoor = GetComponent<Door>();
+    {   
+        GameObject theDoor = gameObject; 
+        Door thisDoor = theDoor.GetComponent<Door>(); //For at dette skal funke, må du ha lagt inn scriptet Door 
+        //som en komponent på objectet :))
         if (Player.Instance.gameObject != other.gameObject) return;
+        
+        if (thisDoor == null) { Debug.Log("Is it always null?"); }
 
-        if (thisDoor.linkedDoorID != null) {
-            StartCoroutine(TravelToScene(thisDoor.linkedSceneName,thisDoor.linkedDoorID, 2));
+        if (thisDoor.linkedDoorID != null)
+        {
+            StartCoroutine(TravelToScene(thisDoor.linkedSceneName, thisDoor.linkedDoorID, 2));
         }
        
-        if (!SceneTracker.isOppositeDoor(Door.doorID)) {
+        if (!SceneTracker.isOppositeDoor(thisDoor.doorID)) {
             Debug.Log("Check if you switch scene");
             SceneTracker.previousScene = SceneManager.GetActiveScene().name; //for å kunne gå tilbake
-            SceneTracker.previousDoor = Door.doorID;
+            SceneTracker.previousDoor = thisDoor.doorID;
             //  foreach (GameObject gameObject in SceneManager.GetSceneByName(SceneTracker.previousScene).GetRootGameObjects()) {
             //     if (!gameObject.CompareTag("Door")) {
                   
@@ -84,7 +89,7 @@ public class SceneSwitch : MonoBehaviour
         foreach (Door door in doors) {
         if (door.name.Contains(oppositeDoor)) {
             Vector2 newPosition = (Vector2)door.transform.position;
-            rb.position = newPosition + direction(doors) * offsetAmount;
+            rb.position = newPosition + direction(door) * offsetAmount;
             rb.linearVelocity = Vector2.zero;
             break;
         }
