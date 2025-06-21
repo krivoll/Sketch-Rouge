@@ -1,5 +1,5 @@
 # Auto detect text files and perform LF normalization
-* text=auto
+
 # Custom for Visual Studio
 *.cs     diff=csharp
 # Standard to msysgit
@@ -39,13 +39,13 @@
 *.jpg filter=lfs -crlf
 *.mp3 filter=lfs -crlf
 *.mp4 filter=lfs -crlf
-*.png filter=lfs -crlf
+
 *.psd filter=lfs -crlf
 *.tga filter=lfs -crlf
 *.tif filter=lfs -crlf
 
 # Force LF for all text files
-* text=auto eol=lf
+
 
 # Explicitly mark Unity files that should use LF
 *.asset text
