@@ -1,36 +1,42 @@
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class SceneSwitch : MonoBehaviour
 {
+    Door thisDoor;
+    string thisScene; 
     void Start() {
-        
+        GameObject theDoor = gameObject; 
+        thisDoor = theDoor.GetComponent<Door>();
+        thisScene = SceneManager.GetActiveScene().name;
     }
     void OnTriggerExit2D(Collider2D other)
     {   
-        GameObject theDoor = gameObject; 
-        Door thisDoor = theDoor.GetComponent<Door>(); //For at dette skal funke, må du ha lagt inn scriptet Door 
-        //som en komponent på objectet :))
+        
         if (Player.Instance.gameObject != other.gameObject) return;
         
         if (thisDoor == null) { Debug.Log("Is it always null?"); }
 
-        if (thisDoor.linkedDoorID != null)
+        if (!string.IsNullOrEmpty(thisDoor.linkedDoorID))
         {
             StartCoroutine(TravelToScene(thisDoor.linkedSceneName, thisDoor.linkedDoorID, 2));
         }
        
-        if (!SceneTracker.isOppositeDoor(thisDoor.doorID)) {
+        else {
             Debug.Log("Check if you switch scene");
-            SceneTracker.previousScene = SceneManager.GetActiveScene().name; //for å kunne gå tilbake
-            SceneTracker.previousDoor = thisDoor.doorID;
-            //  foreach (GameObject gameObject in SceneManager.GetSceneByName(SceneTracker.previousScene).GetRootGameObjects()) {
+            TravelManager.Instance.incomingDoorID = thisDoor.doorID;
+            TravelManager.Instance.incomingSceneName = thisScene;
+        
+            StartCoroutine(RandomScene(thisDoor, TravelManager.Instance.incomingSceneName));
+
+ 
+                 //  foreach (GameObject gameObject in SceneManager.GetSceneByName(SceneTracker.previousScene).GetRootGameObjects()) {
             //     if (!gameObject.CompareTag("Door")) {
                   
             //     gameObject.SetActive(false); }
             // }
-            StartCoroutine(RandomScene());
            
         }
         // else {
@@ -43,12 +49,11 @@ public class SceneSwitch : MonoBehaviour
         // }
     }
 
-    IEnumerator RandomScene() {
+    IEnumerator RandomScene(Door oldDoor, string previousScene) {
         Scene currentScene = SceneManager.GetActiveScene();
         
         int sceneCount = SceneManager.sceneCountInBuildSettings;
         int sceneIndex;
-
 
         do {
             sceneIndex = Random.Range(0, sceneCount);
@@ -64,33 +69,43 @@ public class SceneSwitch : MonoBehaviour
      
         Scene newScene = SceneManager.GetSceneByBuildIndex(sceneIndex);
         SceneManager.MoveGameObjectToScene(Player.Instance.gameObject, newScene);
+         
+        Door[] doors = FindObjectsOfType<Door>(true)
+    .   Where(d => d.gameObject.scene == newScene)
+        .ToArray();                                             //System LINQ lol, noe streams lignende greier? 
+          foreach (Door door in doors)
+{
+            Debug.Log(door.name + " Hallo");
+        };
 
-        MovePlayerToOppositeDoor();
+        MovePlayerToOppositeDoor(oldDoor, doors);
         
         SceneManager.UnloadSceneAsync(currentScene);
+
     }
 
-    // IEnumerator LoadPreviousScene() {
-    //     yield return SceneManager.LoadSceneAsync(SceneTracker.previousScene, LoadSceneMode.Additive);
-    //     yield return null;
-
-    //     SceneManager.MoveGameObjectToScene(Player.Instance.gameObject, SceneManager.GetSceneByName(SceneTracker.previousScene));
-    //     MovePlayerToOppositeDoor();
-     
-    //     SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
-    // }
-    void MovePlayerToOppositeDoor() {
-           Rigidbody2D rb = Player.Instance.gameObject.GetComponent<Rigidbody2D>();
+    void MovePlayerToOppositeDoor(Door oldDoor, Door[] doors) {
+      
+        Rigidbody2D rb = Player.Instance.gameObject.GetComponent<Rigidbody2D>();
         float offsetAmount = 2f; 
        
-        string oppositeDoor = SceneTracker.getOppositeDoor(gameObject.name);
-        Door[] doors =  Resources.FindObjectsOfTypeAll<Door>();
+      
 
         foreach (Door door in doors) {
-        if (door.name.Contains(oppositeDoor)) {
+        if (door.name.Contains(door.getOppositeDoor(gameObject.name))) {
             Vector2 newPosition = (Vector2)door.transform.position;
             rb.position = newPosition + direction(door) * offsetAmount;
             rb.linearVelocity = Vector2.zero;
+
+            //Lagrer ny dør sin dørID 
+            Debug.Log(door.name);
+            TravelManager.Instance.outgoingDoorID = door.doorID;
+            TravelManager.Instance.outgoingSceneName = door.sceneName;
+
+            //
+            door.linkedDoorID = TravelManager.Instance.incomingDoorID;
+            door.linkedSceneName = TravelManager.Instance.incomingDoorID;
+            BiDirectionalLinkDoors(oldDoor, door, TravelManager.Instance.incomingDoorID, TravelManager.Instance.incomingSceneName);
             break;
         }
     }
@@ -98,13 +113,12 @@ public class SceneSwitch : MonoBehaviour
 
   
     IEnumerator TravelToScene(string sceneName, string targetDoorID, int offset) {
-        yield return SceneManager.LoadSceneAsync(SceneTracker.previousScene, LoadSceneMode.Additive);
+        yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
         yield return null;
 
         Scene newScene = SceneManager.GetSceneByName(sceneName);
         SceneManager.MoveGameObjectToScene(Player.Instance.gameObject, newScene);
         
-  
         Door[] doors =  Resources.FindObjectsOfTypeAll<Door>();
 
         foreach (Door door in doors) {
@@ -115,8 +129,7 @@ public class SceneSwitch : MonoBehaviour
     
     }
     Vector2 direction(Door door) {
-     
-        
+
             if (door.name.Contains("North")) {
                 return Vector2.down;
             }
@@ -132,6 +145,13 @@ public class SceneSwitch : MonoBehaviour
     
          
     return Vector2.zero;
+    }
+    void BiDirectionalLinkDoors(Door oldDoor, Door newDoor, string previousDoor, string previousScene) {
+            newDoor.linkedDoorID = previousDoor;
+            newDoor.linkedSceneName = previousScene;
+            oldDoor.linkedDoorID = newDoor.doorID;
+            oldDoor.linkedSceneName = newDoor.sceneName;
+
     }
 
 }
